@@ -62,6 +62,9 @@
 	};
 
 	Ship.prototype.moveUp = function () {
+	  var x = $('#game');
+	  console.log('moveUp');
+	  console.log(x);
 	  if (this.y > 0) {
 	    this.y -= 5;
 	  }
@@ -69,6 +72,10 @@
 	};
 
 	Ship.prototype.moveDown = function () {
+	  // var x = $('#game')
+	  debugger;
+	  console.log('moveDown');
+	  console.log(x);
 	  if (this.y < canvas.height - 10) {
 	    this.y += 5;
 	  }
