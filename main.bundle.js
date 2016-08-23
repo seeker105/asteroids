@@ -45,12 +45,13 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const $ = __webpack_require__(1);
+	const Ship = __webpack_require__(2);
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
-	var asteroids = [];
 
 	// create Asteroids
+	var asteroids = [];
 	for (var x = 0; x < 4; x++) {
 	  var newX = getRandomNumber(0, canvas.width);
 	  var newY = getRandomNumber(0, canvas.height);
@@ -70,16 +71,24 @@
 
 	Asteroid.prototype.draw = function () {
 	  context.beginPath();
-	  context.arc(100, 125, 20, 0, 2 * Math.PI);
+	  context.arc(this.x, this.y, 20, 0, 2 * Math.PI);
 	  context.stroke();
 	};
 
-	function Ship(x, y, width, height) {
-	  this.x = x;
-	  this.y = y;
-	  this.width = width;
-	  this.height = height;
-	}
+	var ship = new Ship(150, 150, 10, 10);
+
+	var img = new Image();
+	img.src = 'assets/images/nebula.png';
+
+	requestAnimationFrame(function gameLoop() {
+	  context.clearRect(0, 0, canvas.width, canvas.height);
+	  context.drawImage(img, 0, 0, 600, 600);
+	  ship.draw();
+	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
+	    asteroid.draw();
+	  });
+	  requestAnimationFrame(gameLoop);
+	});
 
 	Ship.prototype.draw = function () {
 	  context.fillRect(this.x, this.y, this.width, this.height);
@@ -87,65 +96,26 @@
 	  return this;
 	};
 
-	Ship.prototype.moveUp = function () {
-	  if (this.y > 0) {
-	    this.y -= 5;
-	  }
-	  return this;
-	};
-
-	Ship.prototype.moveDown = function () {
-	  if (this.y < canvas.height - 10) {
-	    this.y += 5;
-	  }
-	  return this;
-	};
-
-	Ship.prototype.moveLeft = function () {
-	  if (this.x > 0) {
-	    this.x -= 5;
-	  }
-	  return this;
-	};
-
-	Ship.prototype.moveRight = function () {
-	  if (this.x < canvas.width - 10) {
-	    this.x += 5;
-	  }
-	  return this;
-	};
-
-	var ship = new Ship(150, 150, 10, 10);
-
-	requestAnimationFrame(function gameLoop() {
-	  context.clearRect(0, 0, canvas.width, canvas.height);
-	  ship.draw();
-	  var aster = new Asteroid(100, 150);
-	  aster.draw();
-	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
-	    // debugger;
-	    asteroid.draw();
-	  });
-	  requestAnimationFrame(gameLoop);
-	});
-
 	document.addEventListener('keydown', function (event) {
-	  event.preventDefault();
 	  console.log('moving ship!');
 	  switch (event.keyCode) {
 	    case 38:
+	      event.preventDefault();
 	      ship.moveUp();
 	      break;
 
 	    case 40:
+	      event.preventDefault();
 	      ship.moveDown();
 	      break;
 
 	    case 37:
+	      event.preventDefault();
 	      ship.moveLeft();
 	      break;
 
 	    case 39:
+	      event.preventDefault();
 	      ship.moveRight();
 	      break;
 	  }
@@ -10230,6 +10200,49 @@
 	return jQuery;
 	} );
 
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	var canvas = document.getElementById('game');
+
+	function Ship(attributes = {}) {
+	  this.x = attributes.x || 150;
+	  this.y = attributes.y || 150;
+	  this.width = attributes.width || 10;
+	  this.height = attributes.height || 10;
+	}
+
+	Ship.prototype.moveUp = function () {
+	  if (this.y > 0) {
+	    this.y -= 5;
+	  }
+	  return this;
+	};
+
+	Ship.prototype.moveDown = function () {
+	  if (this.y < canvas.height - 10) {
+	    this.y += 5;
+	  }
+	  return this;
+	};
+
+	Ship.prototype.moveLeft = function () {
+	  if (this.x > 0) {
+	    this.x -= 5;
+	  }
+	  return this;
+	};
+
+	Ship.prototype.moveRight = function () {
+	  if (this.x < canvas.width - 10) {
+	    this.x += 5;
+	  }
+	  return this;
+	};
+
+	module.exports = Ship;
 
 /***/ }
 /******/ ]);
