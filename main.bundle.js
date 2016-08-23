@@ -120,14 +120,17 @@
 	requestAnimationFrame(function gameLoop() {
 	  context.clearRect(0, 0, canvas.width, canvas.height);
 	  ship.draw();
-	  debugger;
-	  asteroids.forEach(function (asteroid) {
-	    asteroid.draw;
+	  var aster = new Asteroid(100, 150);
+	  aster.draw();
+	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
+	    // debugger;
+	    asteroid.draw();
 	  });
 	  requestAnimationFrame(gameLoop);
 	});
 
 	document.addEventListener('keydown', function (event) {
+	  event.preventDefault();
 	  console.log('moving ship!');
 	  switch (event.keyCode) {
 	    case 38:
