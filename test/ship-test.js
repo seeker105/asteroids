@@ -39,4 +39,13 @@ describe('Ship', function(){
       assert.equal(ship.y, 23);
     });
   });
+
+  describe('moveUp', function(){
+    it('moves ship up', function(){
+      var ship = new Ship({y: 10});
+      ship.moveUp();
+
+      assert.equal(ship.y, 5);
+    });
+  });
 });
