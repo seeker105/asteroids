@@ -49,6 +49,7 @@
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
+	var ship = new Ship();
 
 	// create Asteroids
 	var asteroids = [];
@@ -75,8 +76,6 @@
 	  context.stroke();
 	};
 
-	var ship = new Ship(150, 150, 10, 10);
-
 	var img = new Image();
 	img.src = 'assets/images/nebula.png';
 
@@ -90,33 +89,22 @@
 	  requestAnimationFrame(gameLoop);
 	});
 
-	Ship.prototype.draw = function () {
-	  context.fillRect(this.x, this.y, this.width, this.height);
-	  context.fillStyle = "orange";
-	  return this;
-	};
-
 	document.addEventListener('keydown', function (event) {
-	  console.log('moving ship!');
+	  console.log(ship.x, ship.y);
 	  switch (event.keyCode) {
 	    case 38:
 	      event.preventDefault();
-	      ship.moveUp();
-	      break;
-
-	    case 40:
-	      event.preventDefault();
-	      ship.moveDown();
+	      ship.move();
 	      break;
 
 	    case 37:
 	      event.preventDefault();
-	      ship.moveLeft();
+	      ship.rotateLeft();
 	      break;
 
 	    case 39:
 	      event.preventDefault();
-	      ship.moveRight();
+	      ship.rotateRight();
 	      break;
 	  }
 	});
@@ -10206,39 +10194,40 @@
 /***/ function(module, exports) {
 
 	var canvas = document.getElementById('game');
+	var context = canvas.getContext('2d');
 
 	function Ship(attributes = {}) {
-	  this.x = attributes.x || 150;
-	  this.y = attributes.y || 150;
-	  this.width = attributes.width || 10;
-	  this.height = attributes.height || 10;
+	  this.x = attributes.x || 0;
+	  this.y = attributes.y || 0;
+	  this.width = attributes.width || 30;
+	  this.height = attributes.height || 30;
+	  this.angle = attributes.angle || 0;
 	}
 
-	Ship.prototype.moveUp = function () {
-	  if (this.y > 0) {
-	    this.y -= 5;
-	  }
+	Ship.prototype.draw = function () {
+	  var shipimg = new Image();
+	  shipimg.src = 'assets/images/ship.png';
+	  context.save();
+	  context.translate(canvas.width / 2, canvas.height / 2);
+	  context.rotate(this.angle);
+	  context.drawImage(shipimg, this.x, this.y, this.width, this.height);
+	  context.restore();
 	  return this;
 	};
 
-	Ship.prototype.moveDown = function () {
-	  if (this.y < canvas.height - 10) {
-	    this.y += 5;
-	  }
+	Ship.prototype.move = function () {
+	  this.x += Math.sin(this.angle);
+	  this.y -= Math.cos(this.angle);
 	  return this;
 	};
 
-	Ship.prototype.moveLeft = function () {
-	  if (this.x > 0) {
-	    this.x -= 5;
-	  }
+	Ship.prototype.rotateRight = function () {
+	  this.angle += Math.PI / 45;
 	  return this;
 	};
 
-	Ship.prototype.moveRight = function () {
-	  if (this.x < canvas.width - 10) {
-	    this.x += 5;
-	  }
+	Ship.prototype.rotateLeft = function () {
+	  this.angle -= Math.PI / 45;
 	  return this;
 	};
 

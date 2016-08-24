@@ -6,19 +6,23 @@ describe('Ship', function(){
     var ship = new Ship();
 
     it ('should assign an x coordinate', function(){
-      assert.equal(ship.x, 150);
+      assert.equal(ship.x, 0);
     });
 
     it ('should assign a y coordinate', function(){
-      assert.equal(ship.y, 150);
+      assert.equal(ship.y, 0);
     });
 
     it ('should assign a height', function(){
-      assert.equal(ship.height, 10);
+      assert.equal(ship.height, 30);
     });
 
     it ('should assign a width', function(){
-      assert.equal(ship.width, 10);
+      assert.equal(ship.width, 30);
+    });
+
+    it ('should assign an angle', function(){
+      assert.equal(ship.angle, 0);
     });
   });
 
@@ -43,7 +47,7 @@ describe('Ship', function(){
   describe('moveUp', function(){
     it('moves ship up', function(){
       var ship = new Ship({y: 10});
-      ship.moveUp();
+      ship.move();
 
       assert.equal(ship.y, 5);
     });
