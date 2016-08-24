@@ -44,12 +44,29 @@ describe('Ship', function(){
     });
   });
 
-  describe('moveUp', function(){
-    it('moves ship up', function(){
-      var ship = new Ship({y: 10});
+  describe('Rotate', function(){
+    it('rotates ship left', function(){
+      var ship = new Ship({angle: 0});
+      ship.rotateLeft();
+
+      assert.notEqual(ship.angle, 0);
+    });
+
+    it('rotates ship right', function(){
+      var ship = new Ship({angle: 0});
+      ship.rotateRight();
+
+      assert.notEqual(ship.angle, 0);
+    });
+  });
+
+  describe('Move', function(){
+    it('moves ship', function(){
+      var ship = new Ship({angle: 10, x: 10, y: 10});
       ship.move();
 
-      assert.equal(ship.y, 5);
+      assert.notEqual(ship.x, 10);
+      assert.notEqual(ship.y, 10);
     });
   });
 });
