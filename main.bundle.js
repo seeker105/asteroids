@@ -10205,8 +10205,8 @@
 	};
 
 	Ship.prototype.move = function () {
-	  this.x += 5 * Math.sin(this.angle);
-	  this.y -= 5 * Math.cos(this.angle);
+	  this.x += 10 * Math.sin(this.angle);
+	  this.y -= 10 * Math.cos(this.angle);
 
 	  if (this.x > xWarpLeft) this.x = xWarpRight;
 	  if (this.x < xWarpRight) this.x = xWarpLeft;
@@ -10218,12 +10218,12 @@
 	};
 
 	Ship.prototype.rotateRight = function () {
-	  this.angle += Math.PI / 45;
+	  this.angle += Math.PI / 30;
 	  return this;
 	};
 
 	Ship.prototype.rotateLeft = function () {
-	  this.angle -= Math.PI / 45;
+	  this.angle -= Math.PI / 30;
 	  return this;
 	};
 
@@ -10235,15 +10235,16 @@
 
 	
 	function collisionDetection(ship, asteroids) {
+	  var collisionDetected = false;
 	  for (var i = 0; i < asteroids.length; i++) {
 	    var a = asteroids[i];
 	    if (ship.x + ship.width / 2 > a.x - 20 && ship.x - ship.width / 2 < a.x + 20 && ship.y + ship.height / 2 > a.y - 20 && ship.y - ship.height / 2 < a.y + 20) {
 	      console.log("collision detected!");
-	      return true;
-	    } else {
-	      return false;
+	      debugger;
+	      collisionDetected = true;
 	    }
 	  }
+	  return collisionDetected;
 	}
 
 	module.exports = collisionDetection;
@@ -10264,7 +10265,7 @@
 	  for (var x = 0; x < 5; x++) {
 	    var newX = getRandomNumber(0, canvas.width);
 	    var newY = getRandomNumber(0, canvas.height);
-	    var newAsteroid = new Asteroid(newX, newY);
+	    var newAsteroid = new Asteroid(newX, newY, "gray");
 	    asteroids.push(newAsteroid);
 	  };
 	  return asteroids;
@@ -10288,10 +10289,11 @@
 	  return Math.floor(Math.random() * (max - min + 1)) + min;
 	};
 
-	function Asteroid(x, y) {
+	function Asteroid(x, y, color = 'gray') {
 	  this.x = x;
 	  this.y = y;
 	  this.direction = getRandomNumber(0, 360);
+	  this.color = color;
 	};
 
 	Asteroid.prototype.draw = function () {
@@ -10299,7 +10301,7 @@
 	  context.beginPath();
 	  context.arc(this.x, this.y, largeAsteroidRadius, 0, 2 * Math.PI);
 	  context.stroke();
-	  context.fillStyle = "gray";
+	  context.fillStyle = this.color;
 	  context.fill();
 	};
 
