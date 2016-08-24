@@ -15,14 +15,14 @@ describe('collisionDetection', function(){
     });
   });
 
-    context('with overlap', function(){
-      var ship = new Ship({x: 200, y: 15});
-      var asteroid_1 = {x: 190, y: 10, direction: 25};
-      var asteroids = [asteroid_1];
-      var result = collisionDetection(ship, asteroids);
+  context('with overlap', function(){
+    var ship = new Ship({x: 200, y: 15});
+    var asteroid_1 = {x: 200, y: 15, direction: 25};
+    var asteroids = [asteroid_1];
+    var result = collisionDetection(ship, asteroids);
 
-      it ('should return true', function(){
-        assert.equal(result, true);
-      });
-   });
+    it ('should return true', function(){
+      assert.equal(result, true);
+    });
+  });
 });
