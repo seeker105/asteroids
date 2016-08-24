@@ -65,21 +65,22 @@
 /***/ function(module, exports) {
 
 	var canvas = document.getElementById('game');
-	var context = canvas.getContext('2d');
 
 	function Ship(attributes = {}) {
-	  this.x = attributes.x || 0;
-	  this.y = attributes.y || 0;
+	  this.x = attributes.x || canvas.width / 2;
+	  this.y = attributes.y || canvas.height / 2;
 	  this.width = attributes.width || 30;
 	  this.height = attributes.height || 30;
 	  this.angle = attributes.angle || 0;
 	}
 
 	Ship.prototype.draw = function () {
+	  var context = canvas.getContext('2d');
+	  // the line above needs to stay here or things will break!
 	  var shipimg = new Image();
 	  shipimg.src = 'assets/images/ship.png';
 	  context.save();
-	  context.translate(canvas.width / 2, canvas.height / 2);
+	  context.translate(this.x, this.y);
 	  context.rotate(this.angle);
 	  context.drawImage(shipimg, this.x, this.y, this.width, this.height);
 	  context.restore();
@@ -128,8 +129,8 @@
 	// Hot Module Replacement
 	if(false) {
 		// When the styles change, update the <style> tags
-		module.hot.accept("!!/Users/ACW/turing/4module/asteroids/node_modules/mocha-loader/node_modules/css-loader/index.js!/Users/ACW/turing/4module/asteroids/node_modules/mocha/mocha.css", function() {
-			var newContent = require("!!/Users/ACW/turing/4module/asteroids/node_modules/mocha-loader/node_modules/css-loader/index.js!/Users/ACW/turing/4module/asteroids/node_modules/mocha/mocha.css");
+		module.hot.accept("!!/Users/christopher1/a-projects/asteroids/node_modules/mocha-loader/node_modules/css-loader/index.js!/Users/christopher1/a-projects/asteroids/node_modules/mocha/mocha.css", function() {
+			var newContent = require("!!/Users/christopher1/a-projects/asteroids/node_modules/mocha-loader/node_modules/css-loader/index.js!/Users/christopher1/a-projects/asteroids/node_modules/mocha/mocha.css");
 			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 			update(newContent);
 		});
@@ -404,55 +405,72 @@
 	describe('Ship', function () {
 	  context('with default attributes', function () {
 	    var ship = new Ship();
-	    //
-	    //   it ('should assign an x coordinate', function(){
-	    //     assert.equal(ship.x, 0);
-	    //   });
-	    //
-	    //   it ('should assign a y coordinate', function(){
-	    //     assert.equal(ship.y, 0);
-	    //   });
-	    //
-	    //   it ('should assign a height', function(){
-	    //     assert.equal(ship.height, 30);
-	    //   });
-	    //
-	    //   it ('should assign a width', function(){
-	    //     assert.equal(ship.width, 30);
-	    //   });
-	    //
-	    //   it ('should assign an angle', function(){
-	    //     assert.equal(ship.angle, 0);
+
+	    it('should assign an x coordinate', function () {
+	      assert.equal(ship.x, 0);
+	    });
+
+	    it('should assign a y coordinate', function () {
+	      assert.equal(ship.y, 0);
+	    });
+
+	    it('should assign a height', function () {
+	      assert.equal(ship.height, 30);
+	    });
+
+	    it('should assign a width', function () {
+	      assert.equal(ship.width, 30);
+	    });
+
+	    it('should assign an angle', function () {
+	      assert.equal(ship.angle, 0);
+	    });
+	  });
+
+	  context('with set attributes', function () {
+	    it('allows attributes to be specified', function () {
+	      var attributes = { x: 10, y: 10, height: 12, width: 9 };
+	      var ship = new Ship(attributes);
+	      assert.equal(ship.x, 10);
+	      assert.equal(ship.y, 10);
+	      assert.equal(ship.height, 12);
+	      assert.equal(ship.width, 9);
+	    });
+
+	    it('handles setting only some attributes', function () {
+	      var attributes = { x: 76, y: 23 };
+	      var ship = new Ship(attributes);
+	      assert.equal(ship.x, 76);
+	      assert.equal(ship.y, 23);
+	    });
+	  });
+
+	  describe('Rotate', function () {
+	    it('rotates ship left', function () {
+	      var ship = new Ship({ angle: 0 });
+	      ship.rotateLeft();
+
+	      assert.notEqual(ship.angle, 0);
+	    });
+
+	    it('rotates ship right', function () {
+	      var ship = new Ship({ angle: 0 });
+	      ship.rotateRight();
+
+	      assert.notEqual(ship.angle, 0);
+	    });
+	  });
+
+	  describe('Move', function () {
+	    it('moves ship', function () {
+	      var ship = new Ship({ angle: 10, x: 10, y: 10 });
+	      ship.move();
+
+	      assert.notEqual(ship.x, 10);
+	      assert.notEqual(ship.y, 10);
+	    });
 	  });
 	});
-
-	// context('with set attributes', function(){
-	//   it('allows attributes to be specified', function(){
-	//     var attributes = {x: 10, y: 10, height: 12, width: 9}
-	//     var ship = new Ship(attributes);
-	//     assert.equal(ship.x, 10);
-	//     assert.equal(ship.y, 10);
-	//     assert.equal(ship.height, 12);
-	//     assert.equal(ship.width, 9);
-	//   });
-	//
-	//   it('handles setting only some attributes', function(){
-	//     var attributes = {x: 76, y: 23}
-	//     var ship = new Ship(attributes);
-	//     assert.equal(ship.x, 76);
-	//     assert.equal(ship.y, 23);
-	//   });
-	// });
-
-	// describe('moveUp', function(){
-	//   it('moves ship up', function(){
-	//     var ship = new Ship({y: 10});
-	//     ship.move();
-	//
-	//     assert.equal(ship.y, 5);
-	//   });
-	// });
-	// });
 
 /***/ },
 /* 13 */

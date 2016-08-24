@@ -50,10 +50,15 @@
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
 	var ship = new Ship();
+	var largeAsteroidRadius = 20;
+	var xWarpLeft = canvas.width + largeAsteroidRadius;
+	var xWarpRight = -largeAsteroidRadius;
+	var yWarpBottom = canvas.height + largeAsteroidRadius;
+	var yWarpTop = -largeAsteroidRadius;
 
 	// create Asteroids
 	var asteroids = [];
-	for (var x = 0; x < 4; x++) {
+	for (var x = 0; x < 5; x++) {
 	  var newX = getRandomNumber(0, canvas.width);
 	  var newY = getRandomNumber(0, canvas.height);
 	  var newAsteroid = new Asteroid(newX, newY);
@@ -72,8 +77,18 @@
 
 	Asteroid.prototype.draw = function () {
 	  context.beginPath();
-	  context.arc(this.x, this.y, 20, 0, 2 * Math.PI);
+	  context.arc(this.x, this.y, largeAsteroidRadius, 0, 2 * Math.PI);
 	  context.stroke();
+	};
+
+	Asteroid.prototype.move = function () {
+	  this.x += Math.sin(this.direction);
+	  if (this.x > xWarpLeft) this.x = xWarpRight;
+	  if (this.x < xWarpRight) this.x = xWarpLeft;
+
+	  this.y -= Math.cos(this.direction);
+	  if (this.y > yWarpBottom) this.y = yWarpTop;
+	  if (this.y < yWarpTop) this.y = yWarpBottom;
 	};
 
 	var img = new Image();
@@ -84,8 +99,11 @@
 	  context.drawImage(img, 0, 0, 600, 600);
 	  ship.draw();
 	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
+	    asteroid.move();
 	    asteroid.draw();
 	  });
+	  shipX = new Ship({ x: -30, y: 30 });
+	  shipX.draw();
 	  requestAnimationFrame(gameLoop);
 	});
 
@@ -105,6 +123,10 @@
 	    case 39:
 	      event.preventDefault();
 	      ship.rotateRight();
+	      break;
+
+	    case 40:
+	      event.preventDefault();
 	      break;
 	  }
 	});
@@ -10194,21 +10216,22 @@
 /***/ function(module, exports) {
 
 	var canvas = document.getElementById('game');
-	var context = canvas.getContext('2d');
 
 	function Ship(attributes = {}) {
-	  this.x = attributes.x || 0;
-	  this.y = attributes.y || 0;
+	  this.x = attributes.x || canvas.width / 2;
+	  this.y = attributes.y || canvas.height / 2;
 	  this.width = attributes.width || 30;
 	  this.height = attributes.height || 30;
 	  this.angle = attributes.angle || 0;
 	}
 
 	Ship.prototype.draw = function () {
+	  var context = canvas.getContext('2d');
+	  // the line above needs to stay here or things will break!
 	  var shipimg = new Image();
 	  shipimg.src = 'assets/images/ship.png';
 	  context.save();
-	  context.translate(canvas.width / 2, canvas.height / 2);
+	  context.translate(this.x, this.y);
 	  context.rotate(this.angle);
 	  context.drawImage(shipimg, this.x, this.y, this.width, this.height);
 	  context.restore();
