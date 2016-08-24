@@ -46,50 +46,12 @@
 
 	const $ = __webpack_require__(1);
 	const Ship = __webpack_require__(2);
+	const collisionDetection = __webpack_require__(3);
+	const asteroids = __webpack_require__(4);
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
 	var ship = new Ship();
-	var largeAsteroidRadius = 20;
-	var xWarpLeft = canvas.width + largeAsteroidRadius;
-	var xWarpRight = -largeAsteroidRadius;
-	var yWarpBottom = canvas.height + largeAsteroidRadius;
-	var yWarpTop = -largeAsteroidRadius;
-
-	// create Asteroids
-	var asteroids = [];
-	for (var x = 0; x < 5; x++) {
-	  var newX = getRandomNumber(0, canvas.width);
-	  var newY = getRandomNumber(0, canvas.height);
-	  var newAsteroid = new Asteroid(newX, newY);
-	  asteroids.push(newAsteroid);
-	};
-
-	function getRandomNumber(min, max) {
-	  return Math.floor(Math.random() * (max - min + 1)) + min;
-	};
-
-	function Asteroid(x, y) {
-	  this.x = x;
-	  this.y = y;
-	  this.direction = getRandomNumber(0, 360);
-	};
-
-	Asteroid.prototype.draw = function () {
-	  context.beginPath();
-	  context.arc(this.x, this.y, largeAsteroidRadius, 0, 2 * Math.PI);
-	  context.stroke();
-	};
-
-	Asteroid.prototype.move = function () {
-	  this.x += Math.sin(this.direction);
-	  if (this.x > xWarpLeft) this.x = xWarpRight;
-	  if (this.x < xWarpRight) this.x = xWarpLeft;
-
-	  this.y -= Math.cos(this.direction);
-	  if (this.y > yWarpBottom) this.y = yWarpTop;
-	  if (this.y < yWarpTop) this.y = yWarpBottom;
-	};
 
 	var img = new Image();
 	img.src = 'assets/images/nebula.png';
@@ -102,8 +64,7 @@
 	    asteroid.move();
 	    asteroid.draw();
 	  });
-	  shipX = new Ship({ x: -30, y: 30 });
-	  shipX.draw();
+	  collisionDetection(ship, asteroids);
 	  requestAnimationFrame(gameLoop);
 	});
 
@@ -10216,6 +10177,11 @@
 /***/ function(module, exports) {
 
 	var canvas = document.getElementById('game');
+	var shipHalfLength = 15;
+	var xWarpLeft = canvas.width + shipHalfLength;
+	var xWarpRight = -shipHalfLength;
+	var yWarpBottom = canvas.height + shipHalfLength;
+	var yWarpTop = -shipHalfLength;
 
 	function Ship(attributes = {}) {
 	  this.x = attributes.x || canvas.width / 2;
@@ -10233,14 +10199,21 @@
 	  context.save();
 	  context.translate(this.x, this.y);
 	  context.rotate(this.angle);
-	  context.drawImage(shipimg, this.x, this.y, this.width, this.height);
+	  context.drawImage(shipimg, -(this.width / 2), -(this.height / 2), this.width, this.height);
 	  context.restore();
 	  return this;
 	};
 
 	Ship.prototype.move = function () {
-	  this.x += Math.sin(this.angle);
-	  this.y -= Math.cos(this.angle);
+	  this.x += 5 * Math.sin(this.angle);
+	  this.y -= 5 * Math.cos(this.angle);
+
+	  if (this.x > xWarpLeft) this.x = xWarpRight;
+	  if (this.x < xWarpRight) this.x = xWarpLeft;
+
+	  if (this.y > yWarpBottom) this.y = yWarpTop;
+	  if (this.y < yWarpTop) this.y = yWarpBottom;
+
 	  return this;
 	};
 
@@ -10255,6 +10228,92 @@
 	};
 
 	module.exports = Ship;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	
+	function collisionDetection(ship, asteroids) {
+	  for (var i = 0; i < asteroids.length; i++) {
+	    var a = asteroids[i];
+	    if (ship.x + ship.width / 2 > a.x - 20 && ship.x - ship.width / 2 < a.x + 20 && ship.y + ship.height / 2 > a.y - 20 && ship.y - ship.height / 2 < a.y + 20) {
+	      console.log("collision detected!");
+	      return true;
+	    } else {
+	      return false;
+	    }
+	  }
+	}
+
+	module.exports = collisionDetection;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Asteroid = __webpack_require__(5);
+	var canvas = document.getElementById('game');
+
+	function getRandomNumber(min, max) {
+	  return Math.floor(Math.random() * (max - min + 1)) + min;
+	};
+
+	function createAsteroids() {
+	  var asteroids = [];
+	  for (var x = 0; x < 5; x++) {
+	    var newX = getRandomNumber(0, canvas.width);
+	    var newY = getRandomNumber(0, canvas.height);
+	    var newAsteroid = new Asteroid(newX, newY);
+	    asteroids.push(newAsteroid);
+	  };
+	  return asteroids;
+	};
+
+	module.exports = createAsteroids();
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	var canvas = document.getElementById('game');
+
+	var largeAsteroidRadius = 20;
+	var xWarpLeft = canvas.width + largeAsteroidRadius;
+	var xWarpRight = -largeAsteroidRadius;
+	var yWarpBottom = canvas.height + largeAsteroidRadius;
+	var yWarpTop = -largeAsteroidRadius;
+
+	function getRandomNumber(min, max) {
+	  return Math.floor(Math.random() * (max - min + 1)) + min;
+	};
+
+	function Asteroid(x, y) {
+	  this.x = x;
+	  this.y = y;
+	  this.direction = getRandomNumber(0, 360);
+	};
+
+	Asteroid.prototype.draw = function () {
+	  var context = canvas.getContext('2d');
+	  context.beginPath();
+	  context.arc(this.x, this.y, largeAsteroidRadius, 0, 2 * Math.PI);
+	  context.stroke();
+	  context.fillStyle = "gray";
+	  context.fill();
+	};
+
+	Asteroid.prototype.move = function () {
+	  this.x += Math.sin(this.direction);
+	  if (this.x > xWarpLeft) this.x = xWarpRight;
+	  if (this.x < xWarpRight) this.x = xWarpLeft;
+
+	  this.y -= Math.cos(this.direction);
+	  if (this.y > yWarpBottom) this.y = yWarpTop;
+	  if (this.y < yWarpTop) this.y = yWarpBottom;
+	};
+
+	module.exports = Asteroid;
 
 /***/ }
 /******/ ]);
