@@ -56,17 +56,49 @@
 	var img = new Image();
 	img.src = 'assets/images/nebula.png';
 
-	requestAnimationFrame(function gameLoop() {
-	  context.clearRect(0, 0, canvas.width, canvas.height);
-	  context.drawImage(img, 0, 0, 600, 600);
-	  ship.draw();
-	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
-	    asteroid.move();
-	    asteroid.draw();
+	var gameActive = true;
+
+	while (gameActive) {
+	  requestAnimationFrame(function gameLoop() {
+	    context.clearRect(0, 0, canvas.width, canvas.height);
+	    context.drawImage(img, 0, 0, 600, 600);
+	    ship.draw();
+	    asteroids.forEach(function (asteroid, x, asteroidsArray) {
+	      asteroid.move();
+	      asteroid.draw();
+	    });
+	    if (collisionDetection(ship, asteroids)) {
+	      gameActive = false;
+	    }
 	  });
-	  collisionDetection(ship, asteroids);
-	  requestAnimationFrame(gameLoop);
-	});
+	}
+	// requestAnimationFrame(function endLoop() {
+	//   context.clearRect(0, 0, canvas.width, canvas.height);
+	//   context.drawImage(img, 0, 0, 600, 600);
+	//   asteroids.forEach(function(asteroid, x, asteroidsArray){
+	//     asteroid.move();
+	//     asteroid.draw();
+	//   });
+	//   context.font = "30px Arial";
+	//   context.fillText("Hello World",10,50);
+	// });
+
+
+	//
+	// requestAnimationFrame(function gameLoop() {
+	//   context.clearRect(0, 0, canvas.width, canvas.height);
+	//   context.drawImage(img, 0, 0, 600, 600);
+	//   ship.draw();
+	//   asteroids.forEach(function(asteroid, x, asteroidsArray){
+	//     asteroid.move();
+	//     asteroid.draw();
+	//   });
+	//   if (collisionDetection(ship, asteroids)) {
+	//
+	//   }
+	//   ;
+	//   requestAnimationFrame(gameLoop)
+	// });
 
 	document.addEventListener('keydown', function (event) {
 	  console.log(ship.x, ship.y);
@@ -10233,14 +10265,13 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	
+
 	function collisionDetection(ship, asteroids) {
 	  var collisionDetected = false;
 	  for (var i = 0; i < asteroids.length; i++) {
 	    var a = asteroids[i];
 	    if (ship.x + ship.width / 2 > a.x - 20 && ship.x - ship.width / 2 < a.x + 20 && ship.y + ship.height / 2 > a.y - 20 && ship.y - ship.height / 2 < a.y + 20) {
 	      console.log("collision detected!");
-	      debugger;
 	      collisionDetected = true;
 	    }
 	  }
