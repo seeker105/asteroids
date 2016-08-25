@@ -6,11 +6,11 @@ describe('Ship', function(){
     var ship = new Ship();
 
     it ('should assign an x coordinate', function(){
-      assert.equal(ship.x, 0);
+      assert.equal(ship.x, 300);
     });
 
     it ('should assign a y coordinate', function(){
-      assert.equal(ship.y, 0);
+      assert.equal(ship.y, 300);
     });
 
     it ('should assign a height', function(){
