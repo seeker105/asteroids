@@ -48,60 +48,31 @@
 	const Ship = __webpack_require__(2);
 	const collisionDetection = __webpack_require__(3);
 	const asteroids = __webpack_require__(4);
+	const GameRunner = __webpack_require__(7);
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
 	var ship = new Ship();
 
-	var img = new Image();
-	img.src = 'assets/images/nebula.png';
-
 	var gameActive = true;
+	var lifeCount = 2;
+	var game = new GameRunner(canvas, ship);
 
-	while (gameActive) {
-	  requestAnimationFrame(function gameLoop() {
-	    context.clearRect(0, 0, canvas.width, canvas.height);
-	    context.drawImage(img, 0, 0, 600, 600);
-	    ship.draw();
-	    asteroids.forEach(function (asteroid, x, asteroidsArray) {
-	      asteroid.move();
-	      asteroid.draw();
-	    });
-	    if (collisionDetection(ship, asteroids)) {
-	      gameActive = false;
-	    }
-	  });
-	}
-	// requestAnimationFrame(function endLoop() {
-	//   context.clearRect(0, 0, canvas.width, canvas.height);
-	//   context.drawImage(img, 0, 0, 600, 600);
-	//   asteroids.forEach(function(asteroid, x, asteroidsArray){
-	//     asteroid.move();
-	//     asteroid.draw();
-	//   });
-	//   context.font = "30px Arial";
-	//   context.fillText("Hello World",10,50);
-	// });
-
-
-	//
-	// requestAnimationFrame(function gameLoop() {
-	//   context.clearRect(0, 0, canvas.width, canvas.height);
-	//   context.drawImage(img, 0, 0, 600, 600);
-	//   ship.draw();
-	//   asteroids.forEach(function(asteroid, x, asteroidsArray){
-	//     asteroid.move();
-	//     asteroid.draw();
-	//   });
-	//   if (collisionDetection(ship, asteroids)) {
-	//
-	//   }
-	//   ;
-	//   requestAnimationFrame(gameLoop)
-	// });
+	requestAnimationFrame(function gameLoop() {
+	  debugger;
+	  if (collisionDetection(ship, asteroids)) {
+	    gameActive = false;
+	    lifeCount--;
+	  }
+	  if (gameActive && lifeCount > 0) {
+	    game.playGame(ship);
+	  } else {
+	    game.gameOver(ship);
+	  }
+	  requestAnimationFrame(gameLoop);
+	});
 
 	document.addEventListener('keydown', function (event) {
-	  console.log(ship.x, ship.y);
 	  switch (event.keyCode) {
 	    case 38:
 	      event.preventDefault();
@@ -10208,35 +10179,21 @@
 /* 2 */
 /***/ function(module, exports) {
 
-	var canvas = document.getElementById('game');
-	var shipHalfLength = 15;
-	var xWarpLeft = canvas.width + shipHalfLength;
-	var xWarpRight = -shipHalfLength;
-	var yWarpBottom = canvas.height + shipHalfLength;
-	var yWarpTop = -shipHalfLength;
-
 	function Ship(attributes = {}) {
-	  this.x = attributes.x || canvas.width / 2;
-	  this.y = attributes.y || canvas.height / 2;
+	  this.x = attributes.x || 300;
+	  this.y = attributes.y || 300;
 	  this.width = attributes.width || 30;
 	  this.height = attributes.height || 30;
 	  this.angle = attributes.angle || 0;
 	}
 
-	Ship.prototype.draw = function () {
-	  var context = canvas.getContext('2d');
-	  // the line above needs to stay here or things will break!
-	  var shipimg = new Image();
-	  shipimg.src = 'assets/images/ship.png';
-	  context.save();
-	  context.translate(this.x, this.y);
-	  context.rotate(this.angle);
-	  context.drawImage(shipimg, -(this.width / 2), -(this.height / 2), this.width, this.height);
-	  context.restore();
-	  return this;
-	};
-
 	Ship.prototype.move = function () {
+	  var shipHalfLength = 15;
+	  var xWarpLeft = 600 + shipHalfLength;
+	  var xWarpRight = -shipHalfLength;
+	  var yWarpBottom = 600 + shipHalfLength;
+	  var yWarpTop = -shipHalfLength;
+
 	  this.x += 10 * Math.sin(this.angle);
 	  this.y -= 10 * Math.cos(this.angle);
 
@@ -10265,7 +10222,7 @@
 /* 3 */
 /***/ function(module, exports) {
 
-
+	
 	function collisionDetection(ship, asteroids) {
 	  var collisionDetected = false;
 	  for (var i = 0; i < asteroids.length; i++) {
@@ -10285,17 +10242,15 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const Asteroid = __webpack_require__(5);
-	var canvas = document.getElementById('game');
-
-	function getRandomNumber(min, max) {
-	  return Math.floor(Math.random() * (max - min + 1)) + min;
-	};
+	const RandomNumber = __webpack_require__(6);
 
 	function createAsteroids() {
+
 	  var asteroids = [];
 	  for (var x = 0; x < 5; x++) {
-	    var newX = getRandomNumber(0, canvas.width);
-	    var newY = getRandomNumber(0, canvas.height);
+	    var newX = new RandomNumber(0, 600).getRandomNumber();
+	    var newY = new RandomNumber(0, 600).getRandomNumber();
+
 	    var newAsteroid = new Asteroid(newX, newY, "gray");
 	    asteroids.push(newAsteroid);
 	  };
@@ -10306,24 +10261,21 @@
 
 /***/ },
 /* 5 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	var canvas = document.getElementById('game');
+	const RandomNumber = __webpack_require__(6);
 
 	var largeAsteroidRadius = 20;
-	var xWarpLeft = canvas.width + largeAsteroidRadius;
+	var xWarpLeft = 600 + largeAsteroidRadius;
 	var xWarpRight = -largeAsteroidRadius;
-	var yWarpBottom = canvas.height + largeAsteroidRadius;
+	var yWarpBottom = 600 + largeAsteroidRadius;
 	var yWarpTop = -largeAsteroidRadius;
-
-	function getRandomNumber(min, max) {
-	  return Math.floor(Math.random() * (max - min + 1)) + min;
-	};
 
 	function Asteroid(x, y, color = 'gray') {
 	  this.x = x;
 	  this.y = y;
-	  this.direction = getRandomNumber(0, 360);
+	  this.direction = new RandomNumber(0, 360).getRandomNumber();
 	  this.color = color;
 	};
 
@@ -10347,6 +10299,101 @@
 	};
 
 	module.exports = Asteroid;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	function RandomNumber(min, max) {
+	  this.min = min;
+	  this.max = max;
+	}
+
+	RandomNumber.prototype.getRandomNumber = function () {
+	  var min = this.min;
+	  var max = this.max;
+	  return Math.floor(Math.random() * (max - min + 1)) + min;
+	};
+
+	module.exports = RandomNumber;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const asteroids = __webpack_require__(4);
+	const Render = __webpack_require__(8);
+
+	var canvas = document.getElementById('game');
+	var context = canvas.getContext('2d');
+	var render = new Render();
+
+	function GameRunner(ship) {
+	  this.ship = ship;
+	}
+
+	var img = new Image();
+	img.src = 'assets/images/nebula.png';
+
+	GameRunner.prototype.gameOver = function (ship) {
+	  ship.x = 1000;
+	  ship.y = 1000;
+	  render.renderGameOver();
+	};
+
+	GameRunner.prototype.playGame = function (ship) {
+	  render.renderPlayGame();
+	  render.renderShip(ship);
+	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
+	    asteroid.move();
+	    asteroid.draw();
+	  });
+	};
+
+	module.exports = GameRunner;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	var canvas = document.getElementById('game');
+	var context = canvas.getContext('2d');
+
+	var img = new Image();
+	img.src = 'assets/images/nebula.png';
+
+	function Render() {
+	  this.canvas = canvas;
+	  this.context = context;
+	}
+
+	Render.prototype.renderShip = function (ship) {
+	  var shipimg = new Image();
+	  shipimg.src = 'assets/images/ship_white.png';
+	  var context = this.context;
+	  context.save();
+	  context.translate(ship.x, ship.y);
+	  context.rotate(ship.angle);
+	  context.drawImage(shipimg, -(ship.width / 2), -(ship.height / 2), ship.width, ship.height);
+	  context.restore();
+	  return ship;
+	};
+
+	Render.prototype.renderGameOver = function () {
+	  context.clearRect(0, 0, canvas.width, canvas.height);
+	  context.drawImage(img, 0, 0, 600, 600);
+	  context.fillStyle = "red";
+	  context.textAlign = "center";
+	  context.font = "30px Arial";
+	  context.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+	};
+
+	Render.prototype.renderPlayGame = function () {
+	  context.clearRect(0, 0, canvas.width, canvas.height);
+	  context.drawImage(img, 0, 0, 600, 600);
+	};
+
+	module.exports = Render;
 
 /***/ }
 /******/ ]);
