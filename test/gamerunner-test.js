@@ -14,8 +14,10 @@ describe('GameRunner', function(){
 
   it('starts game', function(){
     var ship = new Ship();
+    var projectiles = [];
+    var lifeCount = 3;
     var game = new GameRunner(ship);
-    game.playGame(ship);
+    game.playGame(ship, lifeCount, projectiles);
 
     assert.equal(game.ship.x, 300)
     assert.equal(game.ship.y, 300)
