@@ -1,30 +1,33 @@
 # Asteroids
 
-###Introduction
-This is a version of the classic Asteroids game.
+<img width="511" alt="for-readme" src="https://cloud.githubusercontent.com/assets/17806544/18110639/6817256a-6ed6-11e6-879a-03dfad456151.png">
 
-###Team
-[Anna Weisbrodt](https://github.com/AnnaCW)
-[Christopher Soden](https://github.com/seeker105)
 
-###Stack
+### Introduction
+This is a modified version of the classic Asteroids game.
+
+### Team
+* [Anna Weisbrodt](https://github.com/AnnaCW)
+* [Christopher Soden](https://github.com/seeker105)
+
+### Stack
 * JavaScript
 * HTML5 canvas
 * Webpack
 * Node
 * Mocha/Chai
 
-###Game Play
+### Game Play
 The object of the game is to hit all the asteroids in each level. The next level is reached when all asteroids have been hit. A game consists of three ships or "lives." The ship can be rotated using the arrow keys, and moved forward using the up arrow. Holding down the spacebar fires bullets continuously.
 
-###Test Suite
-Unit tests were written using Chai. They can be run by cloning down the project, then running `npm install`, `npm start`, then visiting `http://localhost:8080/test.html`.
+### Test Suite
+Unit tests were written using Chai. They can be run by cloning down the project, running `npm install`, `npm start`, then visiting `http://localhost:8080/test.html`.
 
-###Production
+### Production
 
 ADD LINK
 
-###Installation
+### Installation
 
 To install the dependencies:
 
