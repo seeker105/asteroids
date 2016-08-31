@@ -21,8 +21,8 @@ describe('collisionDetection', function(){
     var asteroids = [asteroid_1];
     var result = collisionDetection(ship, asteroids);
 
-    it ('should return true', function(){
-      assert.equal(result, true);
+    it ('should return the hit asteroid', function(){
+      assert.equal(result, asteroid_1);
     });
   });
 });

@@ -10271,7 +10271,7 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	
+
 	function collisionDetection(impactor, asteroids) {
 	  var collisionDetected = false;
 	  for (var i = 0; i < asteroids.length; i++) {
