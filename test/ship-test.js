@@ -28,7 +28,7 @@ describe('Ship', function(){
 
   context('with set attributes', function(){
     it('allows attributes to be specified', function(){
-      var attributes = {x: 10, y: 10, height: 12, width: 9}
+      var attributes = {x: 10, y: 10, height: 12, width: 9};
       var ship = new Ship(attributes);
       assert.equal(ship.x, 10);
       assert.equal(ship.y, 10);
@@ -37,7 +37,7 @@ describe('Ship', function(){
     });
 
     it('handles setting only some attributes', function(){
-      var attributes = {x: 76, y: 23}
+      var attributes = {x: 76, y: 23};
       var ship = new Ship(attributes);
       assert.equal(ship.x, 76);
       assert.equal(ship.y, 23);
