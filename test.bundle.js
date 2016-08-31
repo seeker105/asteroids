@@ -107,7 +107,7 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	
+
 	function collisionDetection(impactor, asteroids) {
 	  var collisionDetected = false;
 	  for (var i = 0; i < asteroids.length; i++) {
@@ -212,9 +212,13 @@
 	var context = canvas.getContext('2d');
 	var render = new Render();
 	var showLifeCount = false;
+	var myStorage = localStorage;
+	if (!myStorage.scoreList) myStorage.scoreList = [0, 0];
+	debugger;
 
 	function GameRunner(ship) {
 	  this.ship = ship;
+	  this.score = 0;
 	}
 
 	var img = new Image();
@@ -223,6 +227,7 @@
 	GameRunner.prototype.gameOver = function (ship) {
 	  ship.x = 1000;
 	  ship.y = 1000;
+	  updateScoreList();
 	  render.renderGameOver();
 	};
 
@@ -257,6 +262,10 @@
 	    asteroid.move();
 	    asteroid.draw();
 	  });
+	};
+
+	GameRunner.prototype.scoreHit = function () {
+	  this.score += 10;
 	};
 
 	module.exports = GameRunner;
