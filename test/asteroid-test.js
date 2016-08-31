@@ -26,8 +26,23 @@ describe('Asteroid', function(){
 describe('Move', function(){
   it ('moves asteroid', function(){
     var asteroid = new Asteroid(50, 100);
+    asteroid.direction = 100;
+    var direction = asteroid.direction;
+
     asteroid.move();
-    assert.notEqual(asteroid.x, 50);
-    assert.notEqual(asteroid.x, 100);
+    assert.equal(asteroid.x, 50 + Math.sin(direction));
+    assert.equal(asteroid.y, 100 - Math.cos(direction));
+
+    asteroid.move();
+    asteroid.move();
+    asteroid.move();
+    asteroid.move();
+    asteroid.move();
+
+    var xDifference = 50 - asteroid.x
+    assert.isAtLeast(xDifference, 1);
+
+    var yDifference = 100 - asteroid.y
+    assert.isAtLeast(yDifference, 1);
   });
 });
