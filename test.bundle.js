@@ -10439,6 +10439,7 @@
 	      scoreArray.splice(x, 0, score);
 	      scoreArray.pop();
 	    }
+	    var k = 2;
 	  });
 	  return scores;
 	}
