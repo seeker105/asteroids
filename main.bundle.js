@@ -49,12 +49,9 @@
 	const collisionDetection = __webpack_require__(3);
 	const asteroids = __webpack_require__(4);
 	const GameRunner = __webpack_require__(7);
-	const Projectile = __webpack_require__(9);
+	const Projectile = __webpack_require__(11);
 
-	var canvas = document.getElementById('game');
-	var context = canvas.getContext('2d');
 	var ship = new Ship();
-
 	var gameActive = true;
 
 	var shipMoving = false;
@@ -75,9 +72,11 @@
 	      gameActive = false;
 	    }
 	  } // if collision with ship
-	  projectiles.forEach(function (bullet, x, projectileArray) {
+	  projectiles.forEach(function (bullet) {
 	    if (collisionDetection(bullet, asteroids)) {
 	      console.log("Bullet hit an asteroid");
+	      var hitAsteroid = collisionDetection(bullet, asteroids);
+	      game.explodeAsteroid(hitAsteroid);
 	      game.scoreHit();
 	      console.log(game.score);
 	    }
@@ -10246,11 +10245,19 @@
 	  this.x += 2 * Math.sin(this.angle);
 	  this.y -= 2 * Math.cos(this.angle);
 
-	  if (this.x > xWarpLeft) this.x = xWarpRight;
-	  if (this.x < xWarpRight) this.x = xWarpLeft;
+	  if (this.x > xWarpLeft) {
+	    this.x = xWarpRight;
+	  }
+	  if (this.x < xWarpRight) {
+	    this.x = xWarpLeft;
+	  }
 
-	  if (this.y > yWarpBottom) this.y = yWarpTop;
-	  if (this.y < yWarpTop) this.y = yWarpBottom;
+	  if (this.y > yWarpBottom) {
+	    this.y = yWarpTop;
+	  }
+	  if (this.y < yWarpTop) {
+	    this.y = yWarpBottom;
+	  }
 
 	  return this;
 	};
@@ -10271,13 +10278,14 @@
 /* 3 */
 /***/ function(module, exports) {
 
-
+	
 	function collisionDetection(impactor, asteroids) {
 	  var collisionDetected = false;
 	  for (var i = 0; i < asteroids.length; i++) {
 	    var a = asteroids[i];
 	    if (impactor.x + impactor.width / 2 > a.x - 20 && impactor.x - impactor.width / 2 < a.x + 20 && impactor.y + impactor.height / 2 > a.y - 20 && impactor.y - impactor.height / 2 < a.y + 20) {
-	      collisionDetected = true;
+	      collisionDetected = a;
+	      // collisionDetected = true;
 	    }
 	  }
 	  return collisionDetected;
@@ -10301,9 +10309,9 @@
 
 	    var newAsteroid = new Asteroid(newX, newY, "gray");
 	    asteroids.push(newAsteroid);
-	  };
+	  }
 	  return asteroids;
-	};
+	}
 
 	module.exports = createAsteroids();
 
@@ -10325,7 +10333,7 @@
 	  this.y = y;
 	  this.direction = new RandomNumber(0, 360).getRandomNumber();
 	  this.color = color;
-	};
+	}
 
 	Asteroid.prototype.draw = function () {
 	  var context = canvas.getContext('2d');
@@ -10338,12 +10346,28 @@
 
 	Asteroid.prototype.move = function () {
 	  this.x += Math.sin(this.direction);
-	  if (this.x > xWarpLeft) this.x = xWarpRight;
-	  if (this.x < xWarpRight) this.x = xWarpLeft;
+	  if (this.x > xWarpLeft) {
+	    this.x = xWarpRight;
+	  }
+	  if (this.x < xWarpRight) {
+	    this.x = xWarpLeft;
+	  }
 
 	  this.y -= Math.cos(this.direction);
-	  if (this.y > yWarpBottom) this.y = yWarpTop;
-	  if (this.y < yWarpTop) this.y = yWarpBottom;
+	  if (this.y > yWarpBottom) {
+	    this.y = yWarpTop;
+	  }
+	  if (this.y < yWarpTop) {
+	    this.y = yWarpBottom;
+	  }
+	};
+
+	Asteroid.prototype.explode = function () {
+	  var context = canvas.getContext('2d');
+	  context.beginPath();
+	  context.arc(this.x, this.y, 40, 0, 2 * Math.PI);
+	  context.fillStyle = "rgba(100, 0, 0, 0.3)";
+	  context.fill();
 	};
 
 	module.exports = Asteroid;
@@ -10369,20 +10393,28 @@
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
+	const $ = __webpack_require__(1);
 	const asteroids = __webpack_require__(4);
 	const Render = __webpack_require__(8);
+	const Sound = __webpack_require__(9);
+	const AsteroidHelper = __webpack_require__(10);
 
 	var canvas = document.getElementById('game');
+	var scoreBoard = document.getElementById('scoreBoard');
 	var context = canvas.getContext('2d');
 	var render = new Render();
 	var showLifeCount = false;
+	var hits = [];
+	var asteroidHelper = new AsteroidHelper();
 	var myStorage = localStorage;
-	if (!myStorage.scoreList) myStorage.scoreList = [0, 0];
-	debugger;
+	if (!myStorage.scoreList) myStorage.scoreList = '[0,0,0,0,0,0,0,0,0,0]';
 
-	function GameRunner(ship) {
+	function GameRunner(ship, level = 1) {
 	  this.ship = ship;
+	  this.level = level;
 	  this.score = 0;
+	  this.gameFinalized = false;
+	  this.displayScores();
 	}
 
 	var img = new Image();
@@ -10391,8 +10423,13 @@
 	GameRunner.prototype.gameOver = function (ship) {
 	  ship.x = 1000;
 	  ship.y = 1000;
-	  updateScoreList();
+	  if (!this.gameFinalized) {
+	    this.gameFinalized = true;
+	    this.updateScoreList();
+	    this.displayScores();
+	  }
 	  render.renderGameOver();
+	  render.renderScore(this.score);
 	};
 
 	GameRunner.prototype.editArray = function (newArray) {
@@ -10414,23 +10451,81 @@
 
 	GameRunner.prototype.playGame = function (ship, lifeCount, projectiles) {
 	  render.renderPlayGame();
+	  render.renderScore(this.score);
 	  render.renderShip(ship);
 	  if (showLifeCount) {
 	    render.lifeCount(lifeCount);
 	  }
+	  if (hits) {
+	    render.renderExplosions(hits);
+	  }
+
 	  projectiles.forEach(function (bullet, x, projectileArray) {
 	    bullet.move();
 	    bullet.draw();
+	    bullet.edgeCheck(x, projectileArray);
 	  });
-	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
+	  asteroids.forEach(function (asteroid) {
 	    asteroid.move();
 	    asteroid.draw();
 	  });
+	  if (asteroids.length === 0) {
+	    this.newLevel(ship, lifeCount, projectiles);
+	  }
+	};
+
+	GameRunner.prototype.newLevel = function (ship, lifeCount, projectiles) {
+	  var level = this.level += 1;
+	  $(".level").html("Level " + level);
+	  asteroidHelper.addAsteroids(8, asteroids);
+	  this.playGame(ship, lifeCount, projectiles);
+	};
+
+	GameRunner.prototype.explodeAsteroid = function (hitAsteroid) {
+	  hits.push(hitAsteroid);
+	  var sound = new Sound();
+	  sound.play();
+	  setTimeout(function () {
+	    hits = [];
+	  }, 500);
+	  asteroids.splice(asteroids.indexOf(hitAsteroid), 1);
 	};
 
 	GameRunner.prototype.scoreHit = function () {
 	  this.score += 10;
 	};
+
+	GameRunner.prototype.updateScoreList = function () {
+	  var scores = $.parseJSON(myStorage.scoreList);
+	  newScores = insertScore(scores, this.score);
+	  myStorage.scoreList = JSON.stringify(newScores);
+	};
+
+	GameRunner.prototype.displayScores = function () {
+	  scores = $.parseJSON(myStorage.scoreList);
+	  var result = 'Scores:<br /><ol type="1">';
+	  scores.forEach(function (score) {
+	    if (score > 0) {
+	      result = result + '<li>' + score + '</li>';
+	    }
+	  });
+	  scoreBoard.innerHTML = result;
+	  return;
+	};
+
+	function insertScore(scores, score) {
+	  var scoreNotAdded = true;
+	  var equalScore = false;
+	  scores.forEach(function (recordedScore, x, scoreArray) {
+	    if (score === recordedScore) equalScore = true;
+	    if (!equalScore && scoreNotAdded && typeof score === "number" && score > recordedScore) {
+	      scoreNotAdded = false;
+	      scoreArray.splice(x, 0, score);
+	      scoreArray.pop();
+	    }
+	  });
+	  return scores;
+	}
 
 	module.exports = GameRunner;
 
@@ -10475,6 +10570,13 @@
 	  context.drawImage(img, 0, 0, 600, 600);
 	};
 
+	Render.prototype.renderScore = function (score) {
+	  context.fillStyle = 'green';
+	  context.textAlign = 'center';
+	  context.font = '15px Arial';
+	  context.fillText("Score: " + score, canvas.width / 2, canvas.height - 30);
+	};
+
 	Render.prototype.lifeCount = function (lifeCount) {
 	  context.clearRect(0, 0, canvas.width, canvas.height);
 	  context.drawImage(img, 0, 0, 600, 600);
@@ -10484,14 +10586,59 @@
 	  context.fillText(lifeCount + " Lives Left", canvas.width / 2, canvas.height / 2);
 	};
 
+	Render.prototype.renderExplosions = function (hits) {
+	  hits.forEach(function (hit) {
+	    hit.explode();
+	  });
+	};
+
 	module.exports = Render;
 
 /***/ },
 /* 9 */
 /***/ function(module, exports) {
 
+	function Sound() {
+	  this.sound = document.createElement("audio");
+	  this.sound.src = 'assets/sounds/explosion_x.wav';
+	  this.sound.setAttribute("preload", "auto");
+	  this.sound.setAttribute("controls", "none");
+	  this.sound.style.display = "none";
+	  document.body.appendChild(this.sound);
+	  this.play = function () {
+	    this.sound.play();
+	  };
+	}
+
+	module.exports = Sound;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Asteroid = __webpack_require__(5);
+	const RandomNumber = __webpack_require__(6);
+
+	function AsteroidHelper() {}
+
+	AsteroidHelper.prototype.addAsteroids = function (num, array) {
+	  for (var x = 0; x < num; x++) {
+	    var newX = new RandomNumber(0, 600).getRandomNumber();
+	    var newY = new RandomNumber(0, 600).getRandomNumber();
+
+	    var newAsteroid = new Asteroid(newX, newY, "gray");
+	    array.push(newAsteroid);
+	  }
+	  return array;
+	};
+
+	module.exports = AsteroidHelper;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
 	var canvas = document.getElementById('game');
-	var context = canvas.getContext('2d');
 
 	function Projectile(ship) {
 	  this.x = ship.x;
@@ -10499,7 +10646,7 @@
 	  this.angle = ship.angle;
 	  this.width = 10;
 	  this.height = 10;
-	};
+	}
 
 	Projectile.prototype.draw = function () {
 	  var context = canvas.getContext('2d');
@@ -10512,12 +10659,18 @@
 	  return this;
 	};
 
-	Projectile.prototype.move = function (ship) {
+	Projectile.prototype.move = function () {
 	  if (this.y > -600) {
 	    this.x += 10 * Math.sin(this.angle);
 	    this.y -= 10 * Math.cos(this.angle);
-	  };
+	  }
 	  return this;
+	};
+
+	Projectile.prototype.edgeCheck = function (x, projectileArray) {
+	  if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+	    projectileArray.splice(x, 1);
+	  }
 	};
 
 	module.exports = Projectile;
