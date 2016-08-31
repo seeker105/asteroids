@@ -49,23 +49,51 @@
 	const collisionDetection = __webpack_require__(3);
 	const asteroids = __webpack_require__(4);
 	const GameRunner = __webpack_require__(7);
+	const Projectile = __webpack_require__(9);
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
 	var ship = new Ship();
 
 	var gameActive = true;
-	var lifeCount = 2;
-	var game = new GameRunner(canvas, ship);
+
+	var shipMoving = false;
+	var rotatingRight = false;
+	var rotatingLeft = false;
+
+	var lifeCount = 3;
+	var projectiles = [];
+	var game = new GameRunner(ship);
 
 	requestAnimationFrame(function gameLoop() {
-	  debugger;
 	  if (collisionDetection(ship, asteroids)) {
-	    gameActive = false;
-	    lifeCount--;
-	  }
-	  if (gameActive && lifeCount > 0) {
-	    game.playGame(ship);
+	    if (lifeCount > 1) {
+	      lifeCount--;
+	      game.nextLife(ship);
+	      game.displayLifeCount();
+	    } else {
+	      gameActive = false;
+	    }
+	  } // if collision with ship
+	  projectiles.forEach(function (bullet, x, projectileArray) {
+	    if (collisionDetection(bullet, asteroids)) {
+	      console.log("Bullet hit an asteroid");
+	      game.scoreHit();
+	      console.log(game.score);
+	    }
+	  });
+	  if (gameActive) {
+	    if (shipMoving) {
+	      ship.move();
+	    }
+	    if (rotatingRight) {
+	      ship.rotateRight();
+	    }
+	    if (rotatingLeft) {
+	      ship.rotateLeft();
+	    }
+
+	    game.playGame(ship, lifeCount, projectiles);
 	  } else {
 	    game.gameOver(ship);
 	  }
@@ -74,23 +102,44 @@
 
 	document.addEventListener('keydown', function (event) {
 	  switch (event.keyCode) {
+	    case 32:
+	      event.preventDefault();
+	      projectiles.push(new Projectile(ship));
+	      break;
+
 	    case 38:
 	      event.preventDefault();
-	      ship.move();
+	      shipMoving = true;
 	      break;
 
 	    case 37:
 	      event.preventDefault();
-	      ship.rotateLeft();
+	      rotatingLeft = true;
 	      break;
 
 	    case 39:
 	      event.preventDefault();
-	      ship.rotateRight();
+	      rotatingRight = true;
 	      break;
 
 	    case 40:
 	      event.preventDefault();
+	      break;
+	  }
+	});
+
+	document.addEventListener('keyup', function (event) {
+	  switch (event.keyCode) {
+	    case 38:
+	      shipMoving = false;
+	      break;
+
+	    case 37:
+	      rotatingLeft = false;
+	      break;
+
+	    case 39:
+	      rotatingRight = false;
 	      break;
 	  }
 	});
@@ -10194,8 +10243,8 @@
 	  var yWarpBottom = 600 + shipHalfLength;
 	  var yWarpTop = -shipHalfLength;
 
-	  this.x += 10 * Math.sin(this.angle);
-	  this.y -= 10 * Math.cos(this.angle);
+	  this.x += 2 * Math.sin(this.angle);
+	  this.y -= 2 * Math.cos(this.angle);
 
 	  if (this.x > xWarpLeft) this.x = xWarpRight;
 	  if (this.x < xWarpRight) this.x = xWarpLeft;
@@ -10223,12 +10272,11 @@
 /***/ function(module, exports) {
 
 	
-	function collisionDetection(ship, asteroids) {
+	function collisionDetection(impactor, asteroids) {
 	  var collisionDetected = false;
 	  for (var i = 0; i < asteroids.length; i++) {
 	    var a = asteroids[i];
-	    if (ship.x + ship.width / 2 > a.x - 20 && ship.x - ship.width / 2 < a.x + 20 && ship.y + ship.height / 2 > a.y - 20 && ship.y - ship.height / 2 < a.y + 20) {
-	      console.log("collision detected!");
+	    if (impactor.x + impactor.width / 2 > a.x - 20 && impactor.x - impactor.width / 2 < a.x + 20 && impactor.y + impactor.height / 2 > a.y - 20 && impactor.y - impactor.height / 2 < a.y + 20) {
 	      collisionDetected = true;
 	    }
 	  }
@@ -10327,9 +10375,14 @@
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
 	var render = new Render();
+	var showLifeCount = false;
+	var myStorage = localStorage;
+	if (!myStorage.scoreList) myStorage.scoreList = [0, 0];
+	debugger;
 
 	function GameRunner(ship) {
 	  this.ship = ship;
+	  this.score = 0;
 	}
 
 	var img = new Image();
@@ -10338,16 +10391,45 @@
 	GameRunner.prototype.gameOver = function (ship) {
 	  ship.x = 1000;
 	  ship.y = 1000;
+	  updateScoreList();
 	  render.renderGameOver();
 	};
 
-	GameRunner.prototype.playGame = function (ship) {
+	GameRunner.prototype.editArray = function (newArray) {
+	  newArray.pop();
+	};
+
+	GameRunner.prototype.nextLife = function (ship) {
+	  ship.x = canvas.width / 2;
+	  ship.y = canvas.height / 2;
+	  ship.angle = 0;
+	};
+
+	GameRunner.prototype.displayLifeCount = function () {
+	  showLifeCount = true;
+	  setTimeout(function () {
+	    showLifeCount = false;
+	  }, 3000);
+	};
+
+	GameRunner.prototype.playGame = function (ship, lifeCount, projectiles) {
 	  render.renderPlayGame();
 	  render.renderShip(ship);
+	  if (showLifeCount) {
+	    render.lifeCount(lifeCount);
+	  }
+	  projectiles.forEach(function (bullet, x, projectileArray) {
+	    bullet.move();
+	    bullet.draw();
+	  });
 	  asteroids.forEach(function (asteroid, x, asteroidsArray) {
 	    asteroid.move();
 	    asteroid.draw();
 	  });
+	};
+
+	GameRunner.prototype.scoreHit = function () {
+	  this.score += 10;
 	};
 
 	module.exports = GameRunner;
@@ -10393,7 +10475,52 @@
 	  context.drawImage(img, 0, 0, 600, 600);
 	};
 
+	Render.prototype.lifeCount = function (lifeCount) {
+	  context.clearRect(0, 0, canvas.width, canvas.height);
+	  context.drawImage(img, 0, 0, 600, 600);
+	  context.fillStyle = "red";
+	  context.textAlign = "center";
+	  context.font = "30px Arial";
+	  context.fillText(lifeCount + " Lives Left", canvas.width / 2, canvas.height / 2);
+	};
+
 	module.exports = Render;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	var canvas = document.getElementById('game');
+	var context = canvas.getContext('2d');
+
+	function Projectile(ship) {
+	  this.x = ship.x;
+	  this.y = ship.y;
+	  this.angle = ship.angle;
+	  this.width = 10;
+	  this.height = 10;
+	};
+
+	Projectile.prototype.draw = function () {
+	  var context = canvas.getContext('2d');
+	  context.beginPath();
+	  context.arc(this.x, this.y, 5, 0, 2 * Math.PI);
+	  context.stroke();
+	  context.fillStyle = "black";
+	  context.fill();
+
+	  return this;
+	};
+
+	Projectile.prototype.move = function (ship) {
+	  if (this.y > -600) {
+	    this.x += 10 * Math.sin(this.angle);
+	    this.y -= 10 * Math.cos(this.angle);
+	  };
+	  return this;
+	};
+
+	module.exports = Projectile;
 
 /***/ }
 /******/ ]);
