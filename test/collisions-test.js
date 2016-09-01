@@ -3,7 +3,7 @@ const collisionDetection = require('../lib/collisions');
 const Ship = require('../lib/ship');
 
 describe('collisionDetection', function(){
-  context('with no overlap', function(){
+  context('asteroid-ship collision with no overlap', function(){
     var ship = new Ship({x: 200, y: 200});
     var asteroid_1 = {x: 10, y: 15, direction: 25};
     var asteroid_2 = {x: 50, y: 50, direction: 250};
@@ -15,7 +15,7 @@ describe('collisionDetection', function(){
     });
   });
 
-  context('with overlap', function(){
+  context('asteroid-ship collision with overlap', function(){
     var ship = new Ship({x: 200, y: 15});
     var asteroid_1 = {x: 200, y: 15, direction: 25};
     var asteroids = [asteroid_1];
