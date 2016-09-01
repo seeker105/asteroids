@@ -39,10 +39,10 @@ describe('Move', function(){
     asteroid.move();
     asteroid.move();
 
-    var xDifference = 50 - asteroid.x
+    var xDifference = 50 - asteroid.x;
     assert.isAtLeast(xDifference, 1);
 
-    var yDifference = 100 - asteroid.y
+    var yDifference = 100 - asteroid.y;
     assert.isAtLeast(yDifference, 1);
   });
 });
