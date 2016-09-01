@@ -28,4 +28,19 @@ describe('Projectile', function(){
 
     assert.notEqual(projectile.y, 300);
   });
+
+  context('edge check - projectile off screen', function(){
+    it('should return the array without the projectile', function(){
+      var ship_2 = new Ship(300, 300, 0);
+      var projectile_2 = new Projectile(ship);
+      projectile.x = 800;
+      projectile.y = 800;
+      var projectileArray = [projectile, projectile_2]
+      var result = projectile.edgeCheck(0, projectileArray);
+
+      assert.equal(result, projectileArray);
+      assert.equal(projectileArray.length, 1);
+      assert.equal(projectileArray[0], projectile_2);
+    });
+  });
 });
