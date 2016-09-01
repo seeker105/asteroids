@@ -44,11 +44,10 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const $ = __webpack_require__(1);
-	const Ship = __webpack_require__(2);
-	const collisionDetection = __webpack_require__(3);
-	const asteroids = __webpack_require__(4);
-	const GameRunner = __webpack_require__(7);
+	const Ship = __webpack_require__(1);
+	const collisionDetection = __webpack_require__(2);
+	const asteroids = __webpack_require__(3);
+	const GameRunner = __webpack_require__(6);
 	const Projectile = __webpack_require__(11);
 
 	var ship = new Ship();
@@ -145,6 +144,317 @@
 
 /***/ },
 /* 1 */
+/***/ function(module, exports) {
+
+	function Ship(attributes = {}) {
+	  this.x = attributes.x || 300;
+	  this.y = attributes.y || 300;
+	  this.width = attributes.width || 30;
+	  this.height = attributes.height || 30;
+	  this.angle = attributes.angle || 0;
+	}
+
+	Ship.prototype.move = function () {
+	  var shipHalfLength = 15;
+	  var xWarpLeft = 600 + shipHalfLength;
+	  var xWarpRight = -shipHalfLength;
+	  var yWarpBottom = 600 + shipHalfLength;
+	  var yWarpTop = -shipHalfLength;
+
+	  this.x += 2 * Math.sin(this.angle);
+	  this.y -= 2 * Math.cos(this.angle);
+
+	  if (this.x > xWarpLeft) {
+	    this.x = xWarpRight;
+	  }
+	  if (this.x < xWarpRight) {
+	    this.x = xWarpLeft;
+	  }
+
+	  if (this.y > yWarpBottom) {
+	    this.y = yWarpTop;
+	  }
+	  if (this.y < yWarpTop) {
+	    this.y = yWarpBottom;
+	  }
+
+	  return this;
+	};
+
+	Ship.prototype.rotateRight = function () {
+	  this.angle += Math.PI / 30;
+	  return this;
+	};
+
+	Ship.prototype.rotateLeft = function () {
+	  this.angle -= Math.PI / 30;
+	  return this;
+	};
+
+	module.exports = Ship;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	
+	function collisionDetection(impactor, asteroids) {
+	  var collisionDetected = false;
+	  for (var i = 0; i < asteroids.length; i++) {
+	    var a = asteroids[i];
+	    if (impactor.x + impactor.width / 2 > a.x - 20 && impactor.x - impactor.width / 2 < a.x + 20 && impactor.y + impactor.height / 2 > a.y - 20 && impactor.y - impactor.height / 2 < a.y + 20) {
+	      collisionDetected = a;
+	      // collisionDetected = true;
+	    }
+	  }
+	  return collisionDetected;
+	}
+
+	module.exports = collisionDetection;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Asteroid = __webpack_require__(4);
+	const RandomNumber = __webpack_require__(5);
+
+	function createAsteroids() {
+
+	  var asteroids = [];
+	  for (var x = 0; x < 5; x++) {
+	    var newX = new RandomNumber(0, 600).getRandomNumber();
+	    var newY = new RandomNumber(0, 600).getRandomNumber();
+
+	    var newAsteroid = new Asteroid(newX, newY, "gray");
+	    asteroids.push(newAsteroid);
+	  }
+	  return asteroids;
+	}
+
+	module.exports = createAsteroids();
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var canvas = document.getElementById('game');
+	const RandomNumber = __webpack_require__(5);
+
+	var largeAsteroidRadius = 20;
+	var xWarpLeft = 600 + largeAsteroidRadius;
+	var xWarpRight = -largeAsteroidRadius;
+	var yWarpBottom = 600 + largeAsteroidRadius;
+	var yWarpTop = -largeAsteroidRadius;
+
+	function Asteroid(x, y, color = 'gray') {
+	  this.x = x;
+	  this.y = y;
+	  this.direction = new RandomNumber(0, 360).getRandomNumber();
+	  this.color = color;
+	}
+
+	Asteroid.prototype.draw = function () {
+	  var context = canvas.getContext('2d');
+	  context.beginPath();
+	  context.arc(this.x, this.y, largeAsteroidRadius, 0, 2 * Math.PI);
+	  context.stroke();
+	  context.fillStyle = this.color;
+	  context.fill();
+	};
+
+	Asteroid.prototype.move = function () {
+	  this.x += Math.sin(this.direction);
+	  if (this.x > xWarpLeft) {
+	    this.x = xWarpRight;
+	  }
+	  if (this.x < xWarpRight) {
+	    this.x = xWarpLeft;
+	  }
+
+	  this.y -= Math.cos(this.direction);
+	  if (this.y > yWarpBottom) {
+	    this.y = yWarpTop;
+	  }
+	  if (this.y < yWarpTop) {
+	    this.y = yWarpBottom;
+	  }
+	};
+
+	Asteroid.prototype.explode = function () {
+	  var context = canvas.getContext('2d');
+	  context.beginPath();
+	  context.arc(this.x, this.y, 40, 0, 2 * Math.PI);
+	  context.fillStyle = "rgba(100, 0, 0, 0.3)";
+	  context.fill();
+	};
+
+	module.exports = Asteroid;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	function RandomNumber(min, max) {
+	  this.min = min;
+	  this.max = max;
+	}
+
+	RandomNumber.prototype.getRandomNumber = function () {
+	  var min = this.min;
+	  var max = this.max;
+	  return Math.floor(Math.random() * (max - min + 1)) + min;
+	};
+
+	module.exports = RandomNumber;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const $ = __webpack_require__(7);
+	const asteroids = __webpack_require__(3);
+	const Render = __webpack_require__(8);
+	const Sound = __webpack_require__(9);
+	const AsteroidHelper = __webpack_require__(10);
+
+	var canvas = document.getElementById('game');
+	var scoreBoard = document.getElementById('scoreBoard');
+	var render = new Render();
+	var showLifeCount = false;
+	var hits = [];
+	var asteroidHelper = new AsteroidHelper();
+	var myStorage = localStorage;
+	if (!myStorage.scoreList) {
+	  myStorage.scoreList = '[0,0,0,0,0,0,0,0,0,0]';
+	}
+
+	function GameRunner(ship, level = 1) {
+	  this.ship = ship;
+	  this.level = level;
+	  this.score = 0;
+	  this.gameFinalized = false;
+	  this.displayScores();
+	}
+
+	var img = new Image();
+	img.src = 'assets/images/nebula.png';
+
+	GameRunner.prototype.gameOver = function (ship) {
+	  ship.x = 1000;
+	  ship.y = 1000;
+	  if (!this.gameFinalized) {
+	    this.gameFinalized = true;
+	    this.updateScoreList();
+	    this.displayScores();
+	  }
+	  render.renderGameOver();
+	  render.renderScore(this.score);
+	};
+
+	GameRunner.prototype.editArray = function (newArray) {
+	  newArray.pop();
+	};
+
+	GameRunner.prototype.nextLife = function (ship) {
+	  ship.x = canvas.width / 2;
+	  ship.y = canvas.height / 2;
+	  ship.angle = 0;
+	};
+
+	GameRunner.prototype.displayLifeCount = function () {
+	  showLifeCount = true;
+	  setTimeout(function () {
+	    showLifeCount = false;
+	  }, 3000);
+	};
+
+	GameRunner.prototype.playGame = function (ship, lifeCount, projectiles) {
+	  render.renderPlayGame();
+	  render.renderScore(this.score);
+	  render.renderAsteroidCount(asteroids.length);
+	  render.renderShip(ship);
+	  if (showLifeCount) {
+	    render.lifeCount(lifeCount);
+	  }
+	  if (hits) {
+	    render.renderExplosions(hits);
+	  }
+
+	  projectiles.forEach(function (bullet, x, projectileArray) {
+	    bullet.move();
+	    bullet.draw();
+	    bullet.edgeCheck(x, projectileArray);
+	  });
+	  asteroids.forEach(function (asteroid) {
+	    asteroid.move();
+	    asteroid.draw();
+	  });
+	  if (asteroids.length === 0) {
+	    this.newLevel(ship, lifeCount, projectiles);
+	  }
+	};
+
+	GameRunner.prototype.newLevel = function (ship, lifeCount, projectiles) {
+	  var level = this.level += 1;
+	  var asteroidCount = 8 + 2 * level;
+	  $(".level").html("Level " + level);
+	  asteroidHelper.addAsteroids(asteroidCount, asteroids);
+	  this.playGame(ship, lifeCount, projectiles);
+	};
+
+	GameRunner.prototype.explodeAsteroid = function (hitAsteroid) {
+	  hits.push(hitAsteroid);
+	  var sound = new Sound();
+	  sound.play();
+	  setTimeout(function () {
+	    hits = [];
+	  }, 500);
+	  asteroids.splice(asteroids.indexOf(hitAsteroid), 1);
+	};
+
+	GameRunner.prototype.scoreHit = function () {
+	  this.score += 10;
+	};
+
+	GameRunner.prototype.updateScoreList = function () {
+	  var scores = $.parseJSON(myStorage.scoreList);
+	  var newScores = insertScore(scores, this.score);
+	  myStorage.scoreList = JSON.stringify(newScores);
+	};
+
+	GameRunner.prototype.displayScores = function () {
+	  var scores = $.parseJSON(myStorage.scoreList);
+	  var result = 'Scores:<br /><ol type="1">';
+	  scores.forEach(function (score) {
+	    if (score > 0) {
+	      result = result + '<li>' + score + '</li>';
+	    }
+	  });
+	  scoreBoard.innerHTML = result;
+	  return;
+	};
+
+	function insertScore(scores, score) {
+	  var scoreNotAdded = true;
+	  var equalScore = false;
+	  scores.forEach(function (recordedScore, x, scoreArray) {
+	    if (score === recordedScore) {
+	      equalScore = true;
+	    }
+	    if (!equalScore && scoreNotAdded && typeof score === "number" && score > recordedScore) {
+	      scoreNotAdded = false;
+	      scoreArray.splice(x, 0, score);
+	      scoreArray.pop();
+	    }
+	  });
+	  return scores;
+	}
+
+	module.exports = GameRunner;
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*eslint-disable no-unused-vars*/
@@ -10224,313 +10534,6 @@
 
 
 /***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	function Ship(attributes = {}) {
-	  this.x = attributes.x || 300;
-	  this.y = attributes.y || 300;
-	  this.width = attributes.width || 30;
-	  this.height = attributes.height || 30;
-	  this.angle = attributes.angle || 0;
-	}
-
-	Ship.prototype.move = function () {
-	  var shipHalfLength = 15;
-	  var xWarpLeft = 600 + shipHalfLength;
-	  var xWarpRight = -shipHalfLength;
-	  var yWarpBottom = 600 + shipHalfLength;
-	  var yWarpTop = -shipHalfLength;
-
-	  this.x += 2 * Math.sin(this.angle);
-	  this.y -= 2 * Math.cos(this.angle);
-
-	  if (this.x > xWarpLeft) {
-	    this.x = xWarpRight;
-	  }
-	  if (this.x < xWarpRight) {
-	    this.x = xWarpLeft;
-	  }
-
-	  if (this.y > yWarpBottom) {
-	    this.y = yWarpTop;
-	  }
-	  if (this.y < yWarpTop) {
-	    this.y = yWarpBottom;
-	  }
-
-	  return this;
-	};
-
-	Ship.prototype.rotateRight = function () {
-	  this.angle += Math.PI / 30;
-	  return this;
-	};
-
-	Ship.prototype.rotateLeft = function () {
-	  this.angle -= Math.PI / 30;
-	  return this;
-	};
-
-	module.exports = Ship;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	
-	function collisionDetection(impactor, asteroids) {
-	  var collisionDetected = false;
-	  for (var i = 0; i < asteroids.length; i++) {
-	    var a = asteroids[i];
-	    if (impactor.x + impactor.width / 2 > a.x - 20 && impactor.x - impactor.width / 2 < a.x + 20 && impactor.y + impactor.height / 2 > a.y - 20 && impactor.y - impactor.height / 2 < a.y + 20) {
-	      collisionDetected = a;
-	      // collisionDetected = true;
-	    }
-	  }
-	  return collisionDetected;
-	}
-
-	module.exports = collisionDetection;
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const Asteroid = __webpack_require__(5);
-	const RandomNumber = __webpack_require__(6);
-
-	function createAsteroids() {
-
-	  var asteroids = [];
-	  for (var x = 0; x < 5; x++) {
-	    var newX = new RandomNumber(0, 600).getRandomNumber();
-	    var newY = new RandomNumber(0, 600).getRandomNumber();
-
-	    var newAsteroid = new Asteroid(newX, newY, "gray");
-	    asteroids.push(newAsteroid);
-	  }
-	  return asteroids;
-	}
-
-	module.exports = createAsteroids();
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var canvas = document.getElementById('game');
-	const RandomNumber = __webpack_require__(6);
-
-	var largeAsteroidRadius = 20;
-	var xWarpLeft = 600 + largeAsteroidRadius;
-	var xWarpRight = -largeAsteroidRadius;
-	var yWarpBottom = 600 + largeAsteroidRadius;
-	var yWarpTop = -largeAsteroidRadius;
-
-	function Asteroid(x, y, color = 'gray') {
-	  this.x = x;
-	  this.y = y;
-	  this.direction = new RandomNumber(0, 360).getRandomNumber();
-	  this.color = color;
-	}
-
-	Asteroid.prototype.draw = function () {
-	  var context = canvas.getContext('2d');
-	  context.beginPath();
-	  context.arc(this.x, this.y, largeAsteroidRadius, 0, 2 * Math.PI);
-	  context.stroke();
-	  context.fillStyle = this.color;
-	  context.fill();
-	};
-
-	Asteroid.prototype.move = function () {
-	  this.x += Math.sin(this.direction);
-	  if (this.x > xWarpLeft) {
-	    this.x = xWarpRight;
-	  }
-	  if (this.x < xWarpRight) {
-	    this.x = xWarpLeft;
-	  }
-
-	  this.y -= Math.cos(this.direction);
-	  if (this.y > yWarpBottom) {
-	    this.y = yWarpTop;
-	  }
-	  if (this.y < yWarpTop) {
-	    this.y = yWarpBottom;
-	  }
-	};
-
-	Asteroid.prototype.explode = function () {
-	  var context = canvas.getContext('2d');
-	  context.beginPath();
-	  context.arc(this.x, this.y, 40, 0, 2 * Math.PI);
-	  context.fillStyle = "rgba(100, 0, 0, 0.3)";
-	  context.fill();
-	};
-
-	module.exports = Asteroid;
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	function RandomNumber(min, max) {
-	  this.min = min;
-	  this.max = max;
-	}
-
-	RandomNumber.prototype.getRandomNumber = function () {
-	  var min = this.min;
-	  var max = this.max;
-	  return Math.floor(Math.random() * (max - min + 1)) + min;
-	};
-
-	module.exports = RandomNumber;
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const $ = __webpack_require__(1);
-	const asteroids = __webpack_require__(4);
-	const Render = __webpack_require__(8);
-	const Sound = __webpack_require__(9);
-	const AsteroidHelper = __webpack_require__(10);
-
-	var canvas = document.getElementById('game');
-	var scoreBoard = document.getElementById('scoreBoard');
-	var context = canvas.getContext('2d');
-	var render = new Render();
-	var showLifeCount = false;
-	var hits = [];
-	var asteroidHelper = new AsteroidHelper();
-	var myStorage = localStorage;
-	if (!myStorage.scoreList) myStorage.scoreList = '[0,0,0,0,0,0,0,0,0,0]';
-
-	function GameRunner(ship, level = 1) {
-	  this.ship = ship;
-	  this.level = level;
-	  this.score = 0;
-	  this.gameFinalized = false;
-	  this.displayScores();
-	}
-
-	var img = new Image();
-	img.src = 'assets/images/nebula.png';
-
-	GameRunner.prototype.gameOver = function (ship) {
-	  ship.x = 1000;
-	  ship.y = 1000;
-	  if (!this.gameFinalized) {
-	    this.gameFinalized = true;
-	    this.updateScoreList();
-	    this.displayScores();
-	  }
-	  render.renderGameOver();
-	  render.renderScore(this.score);
-	};
-
-	GameRunner.prototype.editArray = function (newArray) {
-	  newArray.pop();
-	};
-
-	GameRunner.prototype.nextLife = function (ship) {
-	  ship.x = canvas.width / 2;
-	  ship.y = canvas.height / 2;
-	  ship.angle = 0;
-	};
-
-	GameRunner.prototype.displayLifeCount = function () {
-	  showLifeCount = true;
-	  setTimeout(function () {
-	    showLifeCount = false;
-	  }, 3000);
-	};
-
-	GameRunner.prototype.playGame = function (ship, lifeCount, projectiles) {
-	  render.renderPlayGame();
-	  render.renderScore(this.score);
-	  render.renderShip(ship);
-	  if (showLifeCount) {
-	    render.lifeCount(lifeCount);
-	  }
-	  if (hits) {
-	    render.renderExplosions(hits);
-	  }
-
-	  projectiles.forEach(function (bullet, x, projectileArray) {
-	    bullet.move();
-	    bullet.draw();
-	    bullet.edgeCheck(x, projectileArray);
-	  });
-	  asteroids.forEach(function (asteroid) {
-	    asteroid.move();
-	    asteroid.draw();
-	  });
-	  if (asteroids.length === 0) {
-	    this.newLevel(ship, lifeCount, projectiles);
-	  }
-	};
-
-	GameRunner.prototype.newLevel = function (ship, lifeCount, projectiles) {
-	  var level = this.level += 1;
-	  $(".level").html("Level " + level);
-	  asteroidHelper.addAsteroids(8, asteroids);
-	  this.playGame(ship, lifeCount, projectiles);
-	};
-
-	GameRunner.prototype.explodeAsteroid = function (hitAsteroid) {
-	  hits.push(hitAsteroid);
-	  var sound = new Sound();
-	  sound.play();
-	  setTimeout(function () {
-	    hits = [];
-	  }, 500);
-	  asteroids.splice(asteroids.indexOf(hitAsteroid), 1);
-	};
-
-	GameRunner.prototype.scoreHit = function () {
-	  this.score += 10;
-	};
-
-	GameRunner.prototype.updateScoreList = function () {
-	  var scores = $.parseJSON(myStorage.scoreList);
-	  newScores = insertScore(scores, this.score);
-	  myStorage.scoreList = JSON.stringify(newScores);
-	};
-
-	GameRunner.prototype.displayScores = function () {
-	  scores = $.parseJSON(myStorage.scoreList);
-	  var result = 'Scores:<br /><ol type="1">';
-	  scores.forEach(function (score) {
-	    if (score > 0) {
-	      result = result + '<li>' + score + '</li>';
-	    }
-	  });
-	  scoreBoard.innerHTML = result;
-	  return;
-	};
-
-	function insertScore(scores, score) {
-	  var scoreNotAdded = true;
-	  var equalScore = false;
-	  scores.forEach(function (recordedScore, x, scoreArray) {
-	    if (score === recordedScore) equalScore = true;
-	    if (!equalScore && scoreNotAdded && typeof score === "number" && score > recordedScore) {
-	      scoreNotAdded = false;
-	      scoreArray.splice(x, 0, score);
-	      scoreArray.pop();
-	    }
-	    var k = 2;
-	  });
-	  return scores;
-	}
-
-	module.exports = GameRunner;
-
-/***/ },
 /* 8 */
 /***/ function(module, exports) {
 
@@ -10578,6 +10581,13 @@
 	  context.fillText("Score: " + score, canvas.width / 2, canvas.height - 30);
 	};
 
+	Render.prototype.renderAsteroidCount = function (count) {
+	  context.fillStyle = 'green';
+	  context.textAlign = 'center';
+	  context.font = '15px Arial';
+	  context.fillText("Asteroid Remaining: " + count, canvas.width / 2, 30);
+	};
+
 	Render.prototype.lifeCount = function (lifeCount) {
 	  context.clearRect(0, 0, canvas.width, canvas.height);
 	  context.drawImage(img, 0, 0, 600, 600);
@@ -10617,8 +10627,8 @@
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Asteroid = __webpack_require__(5);
-	const RandomNumber = __webpack_require__(6);
+	const Asteroid = __webpack_require__(4);
+	const RandomNumber = __webpack_require__(5);
 
 	function AsteroidHelper() {}
 

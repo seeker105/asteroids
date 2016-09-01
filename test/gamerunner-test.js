@@ -2,8 +2,6 @@ const assert = require('chai').assert;
 const Ship = require('../lib/ship');
 const GameRunner = require('../lib/game_runner');
 const asteroids = require('../lib/asteroids');
-var canvas = document.getElementById('game');
-var context = canvas.getContext('2d');
 
 describe('GameRunner', function(){
   it('creates game with ship attribute', function(){
@@ -37,12 +35,12 @@ describe('GameRunner', function(){
     var ship = new Ship();
     var game = new GameRunner(ship);
 
-    assert.equal(asteroids.length, 5)
+    assert.equal(asteroids.length, 5);
 
-    var hitAsteroid = asteroids[0]
+    var hitAsteroid = asteroids[0];
     game.explodeAsteroid(hitAsteroid);
 
-    assert.equal(asteroids.length, 4)
-    assert.notInclude(asteroids, hitAsteroid)
+    assert.equal(asteroids.length, 4);
+    assert.notInclude(asteroids, hitAsteroid);
   });
 });
