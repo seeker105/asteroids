@@ -33,7 +33,6 @@ describe('collisionDetection', function(){
     var projectile = new Projectile(ship);
 
     var asteroid_1 = {x: 50, y: 15, direction: 20};
-    var asteroid_2 = {x: 100, y: 50, direction: 50};
     var asteroids = [asteroid_1];
     var result = collisionDetection(projectile, asteroids);
 
