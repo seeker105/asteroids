@@ -5,3 +5,4 @@ require('./asteroids-test.js');
 require('./gamerunner-test.js');
 require('./projectile-test.js');
 require('./asteroid-helper-test.js');
+require('./random-number-test.js');
